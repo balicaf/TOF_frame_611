@@ -9,7 +9,7 @@ import time
 import struct
 import matplotlib.pyplot as plt
 import numpy as np
-#import numpy as np
+import matplotlib.animation as animation
 
 def main():
     #send_test_string (SET_POWER_ON())
@@ -84,23 +84,30 @@ def send_test_string (test_string):
     #READ
     i=0
     a = np.zeros((64,1))
-    try:
-        for i in range (65):
-            
-            loopback = serialPort.read(4)
-            combined = struct.unpack("<I", loopback)[0]
-            if ( i > 0):
-                a[i-1] = combined
-            #print (i-1, "=   ",combined)#,"\n")
-    except IOError:
-        print ("Failed at", port, "\n")
-        serialPort.close()
-    except KeyboardInterrupt:
-        print ("interupt at", port, "\n")
-        serialPort.close()
-        time.sleep(.1)
-    print("hello")
-    plt.imshow(a.reshape(8,8), cmap='hot', interpolation='nearest',vmax=30000)
+    fig = plt.figure()
+    ims = []
+    for i in range(60):
+        try:
+            for i in range (65):
+
+                loopback = serialPort.read(4)
+                combined = struct.unpack("<I", loopback)[0]
+                if ( i > 0):
+                    a[i-1] = combined
+                #print (i-1, "=   ",combined)#,"\n")
+        except IOError:
+            print ("Failed at", port, "\n")
+            serialPort.close()
+        except KeyboardInterrupt:
+            print ("interupt at", port, "\n")
+            serialPort.close()
+            time.sleep(.1)
+        print("hello")
+        im = plt.imshow(a.reshape(8,8), cmap='hot', interpolation='nearest',vmax=30000)
+        ims.append([im])
+        #plt.show()
+    ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True,
+                                repeat_delay=1000)
     plt.show()
 if __name__ == "__main__":
     # execute only if run as a script
