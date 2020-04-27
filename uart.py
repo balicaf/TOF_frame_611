@@ -12,8 +12,8 @@ import numpy as np
 #import numpy as np
 
 def main():
-    send_test_string (SET_POWER_OFF())
-    #send_test_string (GET_DISTANCE())
+    #send_test_string (SET_POWER_ON())
+    send_test_string (GET_DISTANCE())
     
    
 def GET_DISTANCE():
@@ -57,7 +57,7 @@ def SET_POWER_ON():
     test_string.append(0xD7)
     test_string.append(0xD6)
     test_string.append(0x91)
-    print (test_string)
+    #print (test_string)
     return test_string
 #test_string = b"Testing 1 2 3 4" ### Will also work
 
@@ -85,16 +85,13 @@ def send_test_string (test_string):
     i=0
     a = np.zeros((64,1))
     try:
-        while(1):
-            i+=1
+        for i in range (65):
             
             loopback = serialPort.read(4)
             combined = struct.unpack("<I", loopback)[0]
-            if ( i > 1):
-                a[i-2] = combined
-            print (i, "=   ",combined)#,"\n")
-            if ( i == 65 ):
-                break
+            if ( i > 0):
+                a[i-1] = combined
+            #print (i-1, "=   ",combined)#,"\n")
     except IOError:
         print ("Failed at", port, "\n")
         serialPort.close()
@@ -108,3 +105,4 @@ def send_test_string (test_string):
 if __name__ == "__main__":
     # execute only if run as a script
     main()
+
