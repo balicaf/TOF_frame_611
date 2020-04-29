@@ -8,13 +8,15 @@ import serial
 import time
 import struct
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 import numpy as np
 import matplotlib.animation as animation
+import time
 
 def main():
     #send_test_string (SET_POWER_ON())
     send_test_string (GET_DISTANCE())
-    
+    #send_test_string (SET_POWER_OFF())
    
 def GET_DISTANCE():
     test_string = bytearray()
@@ -67,27 +69,34 @@ def SET_POWER_ON():
 def send_test_string (test_string):
     port = "/dev/serial0"
     #WRITE
-
-    try:
-        serialPort = serial.Serial(port, 921600, timeout = 2)
-        serialPort.flushInput()
-        serialPort.flushOutput()
-        print("Opened port", port, "for testing:")
-        bytes_sent = serialPort  .write(test_string)
-        print ("Sent", bytes_sent, "bytes")
-    except IOError:
-        print ("Failed at", port, "\n")
-    except KeyboardInterrupt:
-        print ("interupt at", port, "\n")
-        time.sleep(.1)
-
-    #READ
-    i=0
     a = np.zeros((64,1))
     fig = plt.figure()
     ims = []
-    for i in range(60):
+    tic = time.perf_counter()
+    for j in range(64):
         try:
+            serialPort = serial.Serial(port, 921600, timeout = 2)
+            serialPort.flushInput()
+            serialPort.flushOutput()
+            #print("Opened port", port, "for testing:")
+            bytes_sent = serialPort  .write(test_string)
+            #print ("Sent", bytes_sent, "bytes")
+        except IOError:
+            print ("Failed at", port, "\n")
+        except KeyboardInterrupt:
+            print ("interupt at", port, "\n")
+            time.sleep(.1)
+
+    #READ
+
+        try:
+            if j!=0:
+                time2wait =0.033 - (time.perf_counter()-timeSpent)
+                #print(time2wait)
+                #if time2wait>0:
+                    #time.sleep(time2wait)#to have 30 fps exactly
+            timeSpent = time.perf_counter()            
+            
             for i in range (65):
 
                 loopback = serialPort.read(4)
@@ -102,13 +111,21 @@ def send_test_string (test_string):
             print ("interupt at", port, "\n")
             serialPort.close()
             time.sleep(.1)
-        print("hello")
-        im = plt.imshow(a.reshape(8,8), cmap='hot', interpolation='nearest',vmax=30000)
+        #print("hello")
+        im = plt.imshow(a.reshape(8,8), cmap='hot',
+                        interpolation='nearest',
+                        vmin=3000, vmax=90000)
+                        #norm=colors.LogNorm(vmin=3000, vmax=90000))
         ims.append([im])
         #plt.show()
-    ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True,
-                                repeat_delay=1000)
-    plt.show()
+    toc = time.perf_counter()
+    print(toc-tic)    
+    ani = animation.ArtistAnimation(fig, ims, interval=33,
+                                    blit=True, repeat_delay=1000)
+    #ani.save('dynamic-imageT2.mp4')#save video as mp4
+    toc = time.perf_counter()
+    print(toc-tic)
+    plt.show()#just show the figure
 if __name__ == "__main__":
     # execute only if run as a script
     main()
