@@ -123,7 +123,8 @@ def send_test_string (test_string):
                 serialPort.close()
                 time.sleep(.1)
             #print("hello")
-            im = plt.imshow(a.reshape(8,8), cmap='hot',
+            im = plt.imshow(a.reshape(8,8),origin='lower',
+                            cmap='hot',
                             interpolation='nearest',
                             vmin=3000, vmax=25000)
                             #norm=colors.LogNorm(vmin=3000, vmax=90000))
