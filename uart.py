@@ -16,8 +16,8 @@ import csv
 
 def main():
     #send_test_string (SET_POWER_ON())
-    send_test_string (GET_DISTANCE())
-    #send_test_string (SET_POWER_OFF())
+    #send_test_string (GET_DISTANCE())
+    send_test_string (SET_POWER_OFF())
    
 def GET_DISTANCE():
     test_string = bytearray()
@@ -76,6 +76,7 @@ def send_test_string (test_string):
     fig = plt.figure()
     ims = []
     tic = time.perf_counter()
+    print("go!!!!") 
     for j in range(nbFrames):
         try:
             serialPort = serial.Serial(port, 921600, timeout = 2)
@@ -91,7 +92,7 @@ def send_test_string (test_string):
             time.sleep(.1)
 
     #READ
-        print("go!!!!")
+        
         try:
             if j!=0:
                 time2wait =0.033 - (time.perf_counter()-timeSpent)
@@ -129,7 +130,7 @@ def send_test_string (test_string):
     #plt.show()
     toc = time.perf_counter()
     print(toc-tic)
-    with open("new_file2.csv","w+") as my_csv:
+    with open("new_file3.csv","w+") as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(b)
 #    ani = animation.ArtistAnimation(fig, ims, interval=33,
