@@ -16,8 +16,8 @@ import csv
 
 def main():
     #send_test_string (SET_POWER_ON())
-    #send_test_string (GET_DISTANCE())
-    send_test_string (SET_POWER_OFF())
+    send_test_string (GET_DISTANCE())
+    #send_test_string (SET_POWER_OFF())
    
 def GET_DISTANCE():
     test_string = bytearray()
@@ -47,7 +47,7 @@ def SET_POWER_OFF():
     test_string.append(0x0B)
     test_string.append(0x77)
     test_string.append(0xCA)
-    print (test_string)
+    #   n,print (test_string)
     return test_string
 def SET_POWER_ON():
     test_string = bytearray()
@@ -71,7 +71,10 @@ def send_test_string (test_string):
     port = "/dev/serial0"
     #WRITE
     a = np.zeros((64,1))
-    nbFrames = 2048
+    if test_string[0:2] == b'\xf5@':# == "GET_DISTANCE()":
+        nbFrames = 1
+    else:# test_string == "SET_POWER_OFF()" or "SET_POWER_ON()":
+        nbFrames = 128
     b = np.zeros((64,nbFrames))
     fig = plt.figure()
     ims = []
@@ -92,53 +95,56 @@ def send_test_string (test_string):
             time.sleep(.1)
 
     #READ
-        
-        try:
-            if j!=0:
-                time2wait =0.033 - (time.perf_counter()-timeSpent)
-                #print(time2wait)
-                if time2wait>0:
-                    time.sleep(time2wait)#to have 30 fps exactly
-            timeSpent = time.perf_counter()            
-            
-            for i in range (65):
+        if test_string[0:2] == b'\xf5@':#"SET_POWER_OFF()" or "SET_POWER_ON()":
+            print(test_string[0:2])
+            return
+        else:
+            try:
+                if j!=0:
+                    time2wait =0.033 - (time.perf_counter()-timeSpent)
+                    #print(time2wait)
+                    if time2wait>0:
+                        time.sleep(time2wait)#to have 30 fps exactly
+                timeSpent = time.perf_counter()            
+                
+                for i in range (65):
 
-                loopback = serialPort.read(4)
-                combined = struct.unpack("<I", loopback)[0]
-                if ( i > 0):
-                    a[i-1] = combined
-                    b[i-1][j] = combined
-                #print (i-1, "=   ",combined)#,"\n")
-        except IOError:
-            print ("Failed at", port, "\n")
-            serialPort.close()
-        except KeyboardInterrupt:
-            print ("interupt at", port, "\n")
-            serialPort.close()
-            time.sleep(.1)
-        #print("hello")
-#        im = plt.imshow(a.reshape(8,8), cmap='hot',
-#                        interpolation='nearest')#,
-#                        vmin=3000, vmax=90000)
-                        #norm=colors.LogNorm(vmin=3000, vmax=90000))
-#        ims.append([im])
+                    loopback = serialPort.read(4)
+                    combined = struct.unpack("<I", loopback)[0]
+                    if ( i > 0):
+                        a[i-1] = combined
+                        b[i-1][j] = combined
+                    #print (i-1, "=   ",combined)#,"\n")
+            except IOError:
+                print ("Failed at", port, "\n")
+                serialPort.close()
+            except KeyboardInterrupt:
+                print ("interupt at", port, "\n")
+                serialPort.close()
+                time.sleep(.1)
+            #print("hello")
+            im = plt.imshow(a.reshape(8,8), cmap='hot',
+                            interpolation='nearest',
+                            vmin=3000, vmax=25000)
+                            #norm=colors.LogNorm(vmin=3000, vmax=90000))
+            ims.append([im])
 #    plt.show()    
 #    bMed = np.median(b, axis=1)
 #    im = plt.imshow(bMed.reshape(8,8), cmap='hot',
 #                        interpolation='nearest')#,
 #                        vmin=3000, vmax=90000)
-    #plt.show()
+#plt.show()
     toc = time.perf_counter()
     print(toc-tic)
-    with open("new_file3.csv","w+") as my_csv:
-        csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(b)
-#    ani = animation.ArtistAnimation(fig, ims, interval=33,
-#                                    blit=True, repeat_delay=1000)
+#         with open("new_file3.csv","w+") as my_csv:
+#             csvWriter = csv.writer(my_csv,delimiter=',')
+#             csvWriter.writerows(b)
+    ani = animation.ArtistAnimation(fig, ims, interval=33,
+                                    blit=True, repeat_delay=1000)
     #ani.save('dynamic-imageT2.mp4')#save video as mp4
     toc = time.perf_counter()
     print(toc-tic)
-#    plt.show()#just show the figure
+    plt.show()#just show the figure
 if __name__ == "__main__":
     # execute only if run as a script
     main()
