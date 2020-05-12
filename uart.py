@@ -16,9 +16,23 @@ import csv
 
 def main():
     #send_test_string (SET_POWER_ON())
-    send_test_string (GET_DISTANCE())
-    #send_test_string (SET_POWER_OFF())
-   
+    #send_test_string(SET_INTEGRATION_TIME_DIS())
+    #send_test_string (GET_DISTANCE())
+    send_test_string (SET_POWER_OFF())
+def SET_INTEGRATION_TIME_DIS():
+    test_string = bytearray()
+    test_string.append(0xF5)
+    test_string.append(0x00)
+    test_string.append(0x01)#01 for 256 micro seconds
+    for i in range(7):
+        test_string.append(0x00)
+    test_string.append(0xE8)
+    test_string.append(0xB8)
+    test_string.append(0xC2)
+    test_string.append(0xF0)
+    return test_string   
+
+
 def GET_DISTANCE():
     test_string = bytearray()
     test_string.append(0xF5)
@@ -71,7 +85,7 @@ def send_test_string (test_string):
     port = "/dev/serial0"
     #WRITE
     a = np.zeros((64,1))
-    if test_string[0:2] == b'\xf5@':# == "GET_DISTANCE()":
+    if test_string[0:2] == b'\xf5@'or test_string[0:2] == b'\xf5\x00':# == "GET_DISTANCE()":
         nbFrames = 1
     else:# test_string == "SET_POWER_OFF()" or "SET_POWER_ON()":
         nbFrames = 128
@@ -95,7 +109,7 @@ def send_test_string (test_string):
             time.sleep(.1)
 
     #READ
-        if test_string[0:2] == b'\xf5@':#"SET_POWER_OFF()" or "SET_POWER_ON()":
+        if test_string[0:2] == b'\xf5@'or test_string[0:2] == b'\xf5\x00':#"SET_POWER_OFF()" or "SET_POWER_ON()":
             print(test_string[0:2])
             return
         else:
@@ -126,7 +140,7 @@ def send_test_string (test_string):
             im = plt.imshow(a.reshape(8,8),origin='lower',
                             cmap='hot',
                             interpolation='nearest',
-                            vmin=3000, vmax=25000)
+                            vmin=3000, vmax=35000)
                             #norm=colors.LogNorm(vmin=3000, vmax=90000))
             ims.append([im])
 #    plt.show()    
